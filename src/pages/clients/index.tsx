@@ -39,7 +39,6 @@ const ClientsPage = () => {
         accessorKey: "distributor",
         header: "Distributor",
         cell: ({ row }: any) =>
-          // FIX: render distributor.name if distributor is object
           typeof row.original.distributor === "object"
             ? row.original.distributor.name
             : row.original.distributor || "Unknown Distributor",

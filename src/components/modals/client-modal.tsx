@@ -26,7 +26,7 @@ export default function ClientOnboardingModal({}) {
   const [open, setOpen] = useState(false);
   const { addClient, fetchClients, distributors } = useAppStore();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<any>({
     accountNumber: "",
     name: "",
     investmentAmount: "",
@@ -52,6 +52,8 @@ export default function ClientOnboardingModal({}) {
         investmentAmount: amount,
         distributor: formData.distributor,
       });
+
+      console.log("Distributor", formData.distributor);
       toast.success("Client added");
       await fetchClients();
 
@@ -170,7 +172,8 @@ export default function ClientOnboardingModal({}) {
               </p>
               <p>
                 <span className="text-muted-foreground">Distributor:</span>{" "}
-                {formData.distributor}
+                {distributors.find((d: any) => d.id === formData.distributor)
+                  ?.distributorName || "—"}
               </p>
             </div>
           </div>
