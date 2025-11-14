@@ -13,7 +13,8 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import CardWrapper from "@/components/card-wrapper";
-import { useAuthStore } from "@/store/use-auth-store";
+import { useAppStore } from "@/store/use-app-store";
+import toast from "react-hot-toast";
 
 interface SignInForm {
   email: string;
@@ -25,7 +26,7 @@ const SignInPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { login } = useAuthStore();
+  const { login } = useAppStore();
 
   const form = useForm<SignInForm>({
     defaultValues: { email: "", password: "" },
@@ -51,9 +52,12 @@ const SignInPage = () => {
           setError("Unknown user role");
         }
       } else {
+        toast.error("Invalid email or password");
         setError("Invalid email or password");
       }
     } catch (error) {
+      toast.error("Login failed. Please try again.");
+
       setError("Login failed. Please try again.");
     } finally {
       setIsLoading(false);

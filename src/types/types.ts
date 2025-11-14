@@ -6,13 +6,10 @@ export interface SideItemTypes {
   title: string;
 }
 
-export interface AuthState {
-  isAuthenticated: boolean;
-  adminEmail: string | null;
-  token?: string | null;
-  role?: string | null;
-  login: (email: string, password: string) => Promise<string | null>;
-  logout: () => void;
+export type ActionType = "CASH_IN" | "CASH_OUT";
+export interface DistributorSummary {
+  _id: string;
+  name: string;
 }
 
 export interface Client {
@@ -20,40 +17,40 @@ export interface Client {
   name: string;
   accountNumber: string;
   investmentAmount: number;
-  distrubutor: string;
+  distributor: DistributorSummary;
+  reaslisedPnl?: string;
+  currentBalance?: string;
+  currentHoldings?: string;
+}
+
+export interface Cash {
+  client: string;
+  amount: string;
+  type: ActionType;
+  remark: string;
 }
 
 export interface Distributor {
   id: string;
+  distributorName: string;
+  distributorEmail: string;
+  distributorAadharNumber: string;
+  distributorPanNumber?: string;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  totalCount: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface Symbol {
+  symbol: string;
+  instrumentId: string;
+  isin: string;
   name: string;
-  email: string;
-  aadharNumber: string;
-  panNumber: string;
-}
-
-export interface DistributorState {
-  distributors: Distributor[];
-  loading: boolean;
-  error: string | null;
-  fetchDistributors: () => Promise<void>;
-  addDistributor: (distributorData: {
-    name: string;
-    email: string;
-    password: string;
-    aadhar: string;
-    pan: string;
-  }) => Promise<void>;
-}
-
-export interface ClientState {
-  clients: Client[];
-  loading: boolean;
-  error: string | null;
-  fetchClients: () => Promise<void>;
-  addClient: (clientData: {
-    accountNumber: string;
-    name: string;
-    investmentAmount: number;
-    distributor: string;
-  }) => Promise<void>;
+  ltp: number;
+  isActive?: boolean;
 }

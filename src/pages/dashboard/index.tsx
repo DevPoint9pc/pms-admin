@@ -1,17 +1,23 @@
 import CardWrapper from "@/components/card-wrapper";
 import SectionHeader from "@/components/section-header";
-import { useDistributorStore } from "@/store/use-distributor-store";
-import { useClientStore } from "@/store/use-client-store";
+import type { Client } from "@/types/types";
+import { useAppStore } from "@/store/use-app-store";
+import UploadCsv from "@/components/upload-csv";
+import AddCashCard from "@/components/add-cash-card";
 
 const DashboardPage = () => {
-  const distributors = useDistributorStore((state) => state.distributors);
-  const clients = useClientStore((state) => state.clients);
+  const distributors = useAppStore((state) => state.distributors);
+  const clients = useAppStore((state) => state.clients);
 
-  const totalInvestment = clients.reduce(
-    (sum, client) => sum + client.investmentAmount,
+  const clientArray: Client[] = Array.isArray(clients)
+    ? clients
+    : (Object.values(clients) as Client[]);
+
+  const totalInvestment = clientArray.reduce(
+    (sum: number, client: Client) => sum + (client.investmentAmount || 0),
     0
   );
-  const assignedClients = clients.filter((c) => c.distributorId).length;
+
   const dashboardStats = [
     {
       title: "Total Distributors",
@@ -21,13 +27,13 @@ const DashboardPage = () => {
       title: "Total Clients",
       value: clients.length,
     },
-    {
-      title: "Assigned Clients",
-      value: assignedClients,
-    },
+
     {
       title: "Total Investment",
-      value: `$${totalInvestment.toLocaleString()}`,
+      value: totalInvestment.toLocaleString("en-US", {
+        style: "currency",
+        currency: "USD",
+      }),
     },
   ];
 
@@ -38,7 +44,7 @@ const DashboardPage = () => {
         subtitle="Overview of your admin panel metrics"
       />
 
-      <div className=" grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-9 lg:grid-cols-4">
+      <div className=" grid grid-cols-3 gap-9">
         {dashboardStats?.map((item) => (
           <CardWrapper
             key={item.title}
@@ -48,6 +54,11 @@ const DashboardPage = () => {
             <p className="font-bold">{item.value}</p>
           </CardWrapper>
         ))}
+      </div>
+
+      <div className="grid grid-cols-2 gap-9">
+        <UploadCsv />
+        <AddCashCard />
       </div>
     </section>
   );

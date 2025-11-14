@@ -1,17 +1,13 @@
 // src/pages/ClientsPage.tsx
 import SectionHeader from "@/components/section-header";
 import ClientOnboardingModal from "@/components/modals/client-modal";
-import { useClientStore } from "@/store/use-client-store";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { DataTable } from "@/components/data-table";
 import type { Client } from "@/types/types";
+import { useAppStore } from "@/store/use-app-store";
 
 const ClientsPage = () => {
-  const { fetchClients, clients } = useClientStore();
-
-  useEffect(() => {
-    fetchClients();
-  }, []);
+  const { clients } = useAppStore();
 
   const clientArray: Client[] = Object.keys(clients)
     .filter((key) => !isNaN(Number(key)))
@@ -33,12 +29,25 @@ const ClientsPage = () => {
         accessorKey: "investmentAmount",
         header: "Investment Amount",
         cell: ({ row }: any) =>
-          `$${(row.getValue("investmentAmount") as number).toLocaleString()}`,
+          `$${
+            (
+              row.getValue("investmentAmount") as number | undefined
+            )?.toLocaleString() || "—"
+          }`,
       },
       {
         accessorKey: "distributor",
         header: "Distributor",
-        cell: ({ row }: any) => row.getValue("distributor"),
+        cell: ({ row }: any) =>
+          // FIX: render distributor.name if distributor is object
+          typeof row.original.distributor === "object"
+            ? row.original.distributor.name
+            : row.original.distributor || "Unknown Distributor",
+      },
+      {
+        accessorKey: "currentBalance",
+        header: "Balance",
+        cell: ({ row }: any) => row.getValue("currentBalance"),
       },
     ],
     []
@@ -52,40 +61,12 @@ const ClientsPage = () => {
         extraComps={<ClientOnboardingModal />}
       />
 
-      {/* Assign Dialog */}
-      {/* <Dialog open={assignOpen} onOpenChange={setAssignOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Assign Client to Distributor</DialogTitle>
-            <DialogDescription>
-              Choose a distributor for this client
-            </DialogDescription>
-          </DialogHeader>
-          <Select onValueChange={handleAssign}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select distributor" />
-            </SelectTrigger>
-            <SelectContent>
-              {distributors.length === 0 ? (
-                <p className="p-2 text-sm ">No distributors available</p>
-              ) : (
-                distributors.map((d) => (
-                  <SelectItem key={d.id} value={d.id}>
-                    {d.name} ({d.clientsCount} clients)
-                  </SelectItem>
-                ))
-              )}
-            </SelectContent>
-          </Select>
-        </DialogContent>
-      </Dialog> */}
       <DataTable
         data={clientArray}
         columns={columns}
         searchKey="name"
-        searchPlaceholder="Search clients"
+        searchPlaceholder="Search clients..."
         itemsPerPage={5}
-        heading="Client List"
         showPagination
       />
     </section>

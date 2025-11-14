@@ -13,39 +13,58 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useDistributorStore } from "@/store/use-distributor-store";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useAppStore } from "@/store/use-app-store";
+import toast from "react-hot-toast";
+
+const distributorSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().min(1, "Email is required").email("Invalid email address"),
+
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  aadhar: z.string().regex(/^\d{12}$/, "Aadhar must be exactly 12 digits"),
+  pan: z
+    .string()
+    .regex(
+      /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
+      "Invalid PAN format (e.g., ABCDE1234F)"
+    ),
+});
+
+type DistributorFormData = z.infer<typeof distributorSchema>;
 
 export default function AddDistributorModal() {
   const [open, setOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const { addDistributor } = useAppStore();
 
-  const { addDistributor } = useDistributorStore();
-
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    aadhar: "",
-    pan: "",
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<DistributorFormData>({
+    resolver: zodResolver(distributorSchema),
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: DistributorFormData) => {
+    try {
+      await addDistributor({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        aadhar: data.aadhar,
+        pan: data.pan,
+      });
 
-    if (!formData.name || !formData.email || !formData.password) {
-      return;
+      toast.success("Distributor added");
+      reset();
+      setOpen(false);
+    } catch (error) {
+      console.error("Failed to add distributor:", error);
     }
-
-    await addDistributor(formData);
-
-    setFormData({
-      name: "",
-      email: "",
-      password: "",
-      aadhar: "",
-      pan: "",
-    });
-    setOpen(false);
   };
 
   const defaultTrigger = (
@@ -67,56 +86,61 @@ export default function AddDistributorModal() {
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name *</Label>
+            <Label htmlFor="name">
+              Name <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="name"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
               placeholder="John Doe"
-              required
+              {...register("name")}
+              className={errors.name ? "border-red-500" : ""}
             />
+            {errors.name && (
+              <p className="text-xs text-red-500">{errors.name.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email *</Label>
+            <Label htmlFor="email">
+              Email <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="email"
               type="email"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
               placeholder="john@example.com"
-              required
+              {...register("email")}
+              className={errors.email ? "border-red-500" : ""}
             />
+            {errors.email && (
+              <p className="text-xs text-red-500">{errors.email.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password *</Label>
+            <Label htmlFor="password">
+              Password <span className="text-red-500">*</span>
+            </Label>
             <div className="relative">
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
                 placeholder="Enter password"
-                required
-                className="pr-10"
+                {...register("password")}
+                className={`pr-10 ${errors.password ? "border-red-500" : ""}`}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
               >
-                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
+            {errors.password && (
+              <p className="text-xs text-red-500">{errors.password.message}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -124,28 +148,34 @@ export default function AddDistributorModal() {
               <Label htmlFor="aadhar">Aadhar Number</Label>
               <Input
                 id="aadhar"
-                value={formData.aadhar}
-                onChange={(e) =>
-                  setFormData({ ...formData, aadhar: e.target.value })
-                }
-                placeholder="1234 5678 9012"
+                placeholder="123456789012"
+                {...register("aadhar")}
+                className={errors.aadhar ? "border-red-500" : ""}
+                maxLength={12}
               />
+              {errors.aadhar && (
+                <p className="text-xs text-red-500">{errors.aadhar.message}</p>
+              )}
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="pan">PAN Number</Label>
               <Input
                 id="pan"
-                value={formData.pan}
-                onChange={(e) =>
-                  setFormData({ ...formData, pan: e.target.value })
-                }
                 placeholder="ABCDE1234F"
+                {...register("pan")}
+                className={`uppercase ${errors.pan ? "border-red-500" : ""}`}
+                style={{ textTransform: "uppercase" }}
+                maxLength={10}
               />
+              {errors.pan && (
+                <p className="text-xs text-red-500">{errors.pan.message}</p>
+              )}
             </div>
           </div>
 
-          <Button type="submit" className="w-full">
-            Create Distributor
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Creating..." : "Create Distributor"}
           </Button>
         </form>
       </DialogContent>

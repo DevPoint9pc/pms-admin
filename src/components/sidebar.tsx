@@ -1,11 +1,11 @@
 import SideItem from "./sidebar-item";
 import { sideMenue } from "@/utils/constants";
-import { useAuthStore } from "@/store/use-auth-store";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useAppStore } from "@/store/use-app-store";
 
 const SideMenue = () => {
-  const { logout } = useAuthStore();
+  const { logout } = useAppStore();
   const navigate = useNavigate();
 
   const handleLogout = () => {

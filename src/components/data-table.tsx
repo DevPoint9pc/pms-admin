@@ -155,12 +155,20 @@ export function DataTable<TData>({
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className="font-medium py-3 md:py-4 text-center text-[#AFAFAF] "
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
+                      className="font-medium py-3 md:py-4 text-center text-[#AFAFAF] max-w-[150px] truncate whitespace-nowrap overflow-hidden"
+                      title={String(
+                        flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )
                       )}
+                    >
+                      <div className="truncate">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </div>
                     </TableCell>
                   ))}
                 </TableRow>

@@ -11,7 +11,7 @@ const AdminLayout = () => {
 
       {/* ----------- Right (Main Content) ---------- */}
       <div className="relative z-10 flex-1 flex flex-col h-full gap-4 lg:gap-6 p-3 lg:p-10 lg:overflow-y-auto bg-[#0D0907] text-white">
-        <div className="flex-1 w-full max-w-[1400px] mx-auto">
+        <div className="flex-1 w-full">
           <Outlet />
         </div>
       </div>

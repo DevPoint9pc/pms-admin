@@ -12,3 +12,13 @@ export const formatDate = (dateString: string) => {
     day: "numeric",
   });
 };
+
+export function formatAadhar(aadhar: string | number): string {
+  if (!aadhar) return "";
+
+  const digits = aadhar.toString().replace(/\D/g, "");
+
+  const limited = digits.slice(0, 12);
+
+  return limited.replace(/(\d{4})(?=\d)/g, "$1 ");
+}

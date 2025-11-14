@@ -1,17 +1,12 @@
 // DistributorsPage.tsx
 import SectionHeader from "@/components/section-header";
-import { useDistributorStore } from "@/store/use-distributor-store";
 import AddDistributorModal from "@/components/modals/distributor-modal";
-import { formatDate } from "@/lib/utils";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { DataTable } from "@/components/data-table";
+import { useAppStore } from "@/store/use-app-store";
 
 const DistributorsPage = () => {
-  const { distributors, fetchDistributors }: any = useDistributorStore();
-
-  useEffect(() => {
-    fetchDistributors();
-  }, []);
+  const { distributors }: any = useAppStore();
 
   const columns = useMemo(
     () => [
@@ -25,15 +20,10 @@ const DistributorsPage = () => {
         header: "Email",
         cell: (info: any) => info.getValue(),
       },
-
-      {
-        accessorKey: "createdAt",
-        header: "Joined",
-        cell: (info: any) => info.getValue(),
-      },
     ],
     []
   );
+
   return (
     <section className="w-full h-max flex py-10 lg:py-0 flex-col gap-8">
       <SectionHeader
@@ -47,7 +37,7 @@ const DistributorsPage = () => {
         columns={columns}
         searchPlaceholder="Search distributors..."
         searchKey="name"
-        itemsPerPage={10}
+        itemsPerPage={5}
         showPagination={true}
         noDataMessage="No distributors found. Add one using the button above."
       />
